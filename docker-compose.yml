@@ -1,0 +1,38 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: realworld
+    ports:
+      - '5432:5432'
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    environment:
+      PORT: 3000
+      DB_CONNECTION_STRING: postgres://user:password@db:5432/realworld
+    depends_on:
+      - db
+    ports:
+      - '3000:3000'
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    environment:
+      VITE_BACKEND_URL: http://localhost:3000
+    depends_on:
+      - backend
+    ports:
+      - '5173:5173'
+
+  openreplay:
+    image: openreplay/tracker:latest
+    ports:
+      - '3569:3569'
